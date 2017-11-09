@@ -1,15 +1,44 @@
+spring:
+  profiles:
+    active: dev
+
+---
+spring:
+  profiles:dev
 server:
   port: 8761
-
-spring:
-  application:
-    name: spring-eureka-server
-
 eureka:
   instance:
     hostname: localhost
   client:
-    registerWithEureka: false # 是否注册信息
-    fetchRegistry: false # 是否拉取信息
-    serviceUrl: # eureka注册中心地址
+    # 是否注册信息
+    registerWithEureka: false
+    # 是否拉取信息
+    fetchRegistry: false
+    # eureka注册中心地址
+    serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+    # false 关闭自我保护，不管如何都要剔除心跳检测异常的服务
+    enableSelfPreservation: true
+    # updatePeerEurekaNodes执行间隔
+    peerEurekaNodesUpdateIntervalMs: 10000000
+
+---
+spring:
+  profiles: eureka1
+server:
+  port: 8761
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8762/eureka/,http://eureka3:8763/eureka/
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+  instance:
+    hostname: eureka1
+    metadataMap:
+      instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
